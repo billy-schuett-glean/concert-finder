@@ -1,0 +1,8 @@
+spotipy
+requests
+python-dotenv
+tabulate
+colorama
+beautifulsoup4
+playwright
+streamlit
