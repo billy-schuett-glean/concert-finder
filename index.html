@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concert Finder — Summer 2026</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d0d0d;
+            color: #e2ddd5;
+            font-family: 'Source Sans 3', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-style: italic;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #c9956b 0%, #e8c9a8 50%, #c9956b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #a89884;
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .stats-bar {
+            display: inline-flex;
+            gap: 2rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1rem;
+        }
+
+        .stat {
+            color: #c9956b;
+            font-weight: 600;
+        }
+
+        .stat-label {
+            color: #888;
+            font-weight: 400;
+            margin-left: 0.25rem;
+        }
+
+        /* Filter Section */
+        .filters {
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .city-filter, .tab-button {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #888;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .city-filter:hover, .tab-button:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(201, 149, 107, 0.3);
+            color: #c9956b;
+        }
+
+        .city-filter.active, .tab-button.active {
+            background: rgba(201, 149, 107, 0.15);
+            border-color: #c9956b;
+            color: #c9956b;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 0;
+        }
+
+        .tab-button {
+            border-radius: 0;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            padding: 1rem 2rem;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #c9956b;
+            background: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Month Dividers */
+        .month-divider {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-style: italic;
+            color: #c9956b;
+            margin: 3rem 0 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(201, 149, 107, 0.3);
+        }
+
+        /* Concert Cards */
+        .concert-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 1.75rem 2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .concert-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12);
+            transform: translateX(8px);
+        }
+
+        .concert-main {
+            flex: 1;
+        }
+
+        .concert-artist {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #e2ddd5;
+            margin-bottom: 0.5rem;
+        }
+
+        .concert-details {
+            font-size: 1rem;
+            color: #a89884;
+            margin-bottom: 0.75rem;
+        }
+
+        .concert-date {
+            color: #c9956b;
+            font-weight: 600;
+        }
+
+        .concert-separator {
+            margin: 0 0.5rem;
+            color: #555;
+        }
+
+        .concert-venue {
+            color: #888;
+        }
+
+        .concert-footer {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .badge {
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-your {
+            background: rgba(201, 149, 107, 0.2);
+            color: #c9956b;
+            border: 1px solid rgba(201, 149, 107, 0.3);
+        }
+
+        .badge-discovery {
+            background: rgba(106, 170, 156, 0.2);
+            color: #6aaa9c;
+            border: 1px solid rgba(106, 170, 156, 0.3);
+        }
+
+        .ticket-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+        }
+
+        .ticket-link:hover {
+            color: #c9956b;
+        }
+
+        /* Hidden state for filtering */
+        .concert-card.hidden {
+            display: none;
+        }
+
+        .month-divider.hidden {
+            display: none;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1.5rem 3rem;
+            }
+
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 0.75rem;
+                padding: 1.5rem 2rem;
+            }
+
+            .concert-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .concert-artist {
+                font-size: 1.5rem;
+            }
+
+            .ticket-link {
+                align-self: flex-start;
+            }
+
+            .filter-buttons {
+                gap: 0.5rem;
+            }
+
+            .city-filter {
+                font-size: 0.85rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1 class="hero-title">Concert Finder</h1>
+        <p class="hero-subtitle">Summer 2026 — Billy & Gretchen's Vacation Shows</p>
+        <div class="stats-bar">
+            <div><span class="stat">27</span> <span class="stat-label">shows</span></div>
+            <div><span class="stat">8</span> <span class="stat-label">cities</span></div>
+            <div><span class="stat">7</span> <span class="stat-label">discoveries</span></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="summer">Your Summer</button>
+            <button class="tab-button" data-tab="outside">Worth the Trip</button>
+        </div>
+
+        <!-- Summer Tab -->
+        <div class="tab-content active" id="summer">
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-buttons">
+                    <button class="city-filter active" data-city="all">All Cities</button>
+                    <button class="city-filter" data-city="Asheville">Asheville</button><button class="city-filter" data-city="Austin">Austin</button><button class="city-filter" data-city="Berkeley">Berkeley</button><button class="city-filter" data-city="Charleston">Charleston</button><button class="city-filter" data-city="Morrison">Morrison</button><button class="city-filter" data-city="Nashville">Nashville</button><button class="city-filter" data-city="North Charleston">North Charleston</button><button class="city-filter" data-city="Portland">Portland</button>
+                </div>
+            </div>
+
+            <!-- Concert List -->
+            <div class="concerts">
+                
+            <div class="month-divider" data-month="May 2026">
+                <span>May 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Morrison" data-month="May 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">JJ Grey & Mofro</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, May 25</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-24-7-pm/concert/17958444" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="May 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">JJ Grey & Mofro</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Tuesday, May 26</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-25-7-pm/concert/17958445" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Nashville" data-month="May 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Marcus King</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Thursday, May 28</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Nashville Municipal Auditorium, Nashville, TN</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/marcus-king-tickets/nashville-tennessee-nashville-municipal-auditorium-2026-05-27-8-pm/concert/18116614" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Berkeley" data-month="May 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Nathaniel Rateliff & The Night Sweats</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, May 30</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">The Greek Theatre at U.C. Berkeley, Berkeley, CA</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-29-8-pm/concert/18030218" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Berkeley" data-month="May 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Nathaniel Rateliff & The Night Sweats</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, May 31</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">The Greek Theatre at U.C. Berkeley, Berkeley, CA</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-30-8-pm/concert/18030219" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="month-divider" data-month="June 2026">
+                <span>June 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Portland" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Ryan Bingham</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Wednesday, June 03</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">State Theatre - Portland, ME, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/ryan-bingham-tickets/portland-maine-state-theatre-portland-me-2026-06-02-8-pm/concert/18078217" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Lord Huron</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Thursday, June 11</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/lord-huron-tickets/morrison-colorado-red-rocks-amphitheatre-2026-06-10-6-pm/concert/17947908" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Charleston" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Mt. Joy</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, June 14</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Credit One Stadium, Charleston, SC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/mt-joy-tickets/charleston-south-carolina-credit-one-stadium-2026-06-13-8-pm/concert/17939243" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Asheville" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Lord Huron</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, June 15</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Harrah's Cherokee Center - Asheville, Asheville, NC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/lord-huron-tickets/asheville-north-carolina-harrah-s-cherokee-center-asheville-2026-06-14-8-pm/concert/18022215" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Charleston" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Lord Huron</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Tuesday, June 16</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Credit One Stadium, Charleston, SC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/lord-huron-tickets/charleston-south-carolina-credit-one-stadium-2026-06-16-7-30-pm/concert/18022218" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="North Charleston" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Chris Stapleton</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, June 26</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">North Charleston Coliseum, North Charleston, SC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-26-7-30-pm/concert/18004696" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="North Charleston" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Chris Stapleton</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, June 27</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">North Charleston Coliseum, North Charleston, SC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-27-7-30-pm/concert/18013270" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Nashville" data-month="June 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Eric Church</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, June 27</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Nissan Stadium, Nashville, TN</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/alan-jackson-tickets/nashville-tennessee-nissan-stadium-2026-06-27-5-30-pm/concert/17781733" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="month-divider" data-month="July 2026">
+                <span>July 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Austin" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Stephen Wilson Jr.</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, July 04</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Germania Insurance Amphitheater, Austin, TX</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/outlaw-music-festival-tickets/austin-texas-germania-insurance-amphitheater-2026-07-04-3-30-pm/concert/18140159" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Avett Brothers</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, July 11</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-10-7-30-pm/concert/17945965" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Avett Brothers</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, July 12</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-11-7-30-pm/concert/17945966" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Avett Brothers</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, July 13</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-12-7-30-pm/concert/17945967" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Head and the Heart</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Thursday, July 16</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-15-7-30-pm/concert/17907129" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Asheville" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Band of Horses</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, July 17</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Hellbender by The Orange Peel, Asheville, NC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/band-of-horses-tickets/asheville-north-carolina-hellbenders-by-the-orange-peel-2026-07-17-7-pm/concert/18125833" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Head and the Heart</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, July 17</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-16-7-30-pm/concert/17907131" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Berkeley" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Rainbow Kitten Surprise</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, July 19</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">The Greek Theatre at U.C. Berkeley, Berkeley, CA</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Mt. Joy</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/rainbow-kitten-surprise-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-07-18-8-pm/concert/17856857" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Charleston" data-month="July 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Cat Power</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, July 20</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Charleston Music Hall, Charleston, SC</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/cat-power-tickets/charleston-south-carolina-charleston-music-hall-2026-07-19-8-pm/concert/18090736" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="month-divider" data-month="August 2026">
+                <span>August 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Portland" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Head and the Heart</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, August 02</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Thompson's Point, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-head-and-the-heart-tickets/portland-maine-thompson-s-point-2026-08-02-6-pm/concert/18115755" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Mt. Joy</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, August 14</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-13-7-pm/concert/17919355" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Mt. Joy</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, August 15</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-14-7-pm/concert/17919356" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Lake Street Dive</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, August 15</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Thompson's Point, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-15-7-pm/concert/18002825" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Lake Street Dive</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, August 16</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Thompson's Point, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-16-7-pm/concert/18002826" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            </div>
+        </div>
+
+        <!-- Outside Tab -->
+        <div class="tab-content" id="outside">
+            <!-- Concert List -->
+            <div class="concerts">
+                
+            <div class="month-divider" data-month="August 2026">
+                <span>August 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Morrison" data-month="August 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Ray LaMontagne</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Thursday, August 27</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/ray-lamontagne-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-26-7-pm/concert/17439519" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="month-divider" data-month="September 2026">
+                <span>September 2026</span>
+            </div>
+            
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Gregory Alan Isakov</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, September 07</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/gregory-alan-isakov-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-06-8-pm/concert/17904743" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Gregory Alan Isakov</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Tuesday, September 08</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/gregory-alan-isakov-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-07-8-pm/concert/17904745" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Stephen Wilson Jr.</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, September 12</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/brandi-carlile-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-11-7-30-pm/concert/18122876" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Stephen Wilson Jr.</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, September 13</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/brandi-carlile-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-12-7-30-pm/concert/18122878" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Rainbow Kitten Surprise</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Sunday, September 13</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Thompson's Point, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Mt. Joy</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/rainbow-kitten-surprise-tickets/portland-maine-thompson-s-point-2026-09-13-6-pm/concert/17856929" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Stephen Wilson Jr.</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Monday, September 14</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/brandi-carlile-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-13-6-30-pm/concert/18122879" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Berkeley" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Bleachers</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, September 18</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">The Greek Theatre at U.C. Berkeley, Berkeley, CA</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/bleachers-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-09-17-6-30-pm/concert/18122690" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Mt. Joy</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Wednesday, September 23</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Thompson's Point, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/mt-joy-tickets/portland-maine-thompson-s-point-2026-09-23-7-pm/concert/18049364" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Bleachers</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Thursday, September 24</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/bleachers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-23-7-30-pm/concert/18122694" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Pat Metheny</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Friday, September 25</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">State Theatre - Portland, ME, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/pat-metheny-tickets/portland-maine-state-theatre-portland-me-2026-09-24-8-pm/concert/18035682" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Morrison" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">The Revivalists</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Saturday, September 26</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">Red Rocks Amphitheatre, Morrison, CO</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-discovery">DISCOVERY — similar to Mt. Joy</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/the-revivalists-tickets/morrison-colorado-red-rocks-amphitheatre-2026-09-25-8-pm/concert/18091224" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Ray LaMontagne</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Tuesday, September 29</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">State Theatre - Portland, ME, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/ray-lamontagne-tickets/portland-maine-state-theatre-portland-me-2026-09-28-8-pm/concert/17431829" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            <div class="concert-card" data-city="Portland" data-month="September 2026">
+                <div class="concert-main">
+                    <div class="concert-artist">Ray LaMontagne</div>
+                    <div class="concert-details">
+                        <span class="concert-date">Wednesday, September 30</span>
+                        <span class="concert-separator">·</span>
+                        <span class="concert-venue">State Theatre - Portland, ME, Portland, ME</span>
+                    </div>
+                    <div class="concert-footer">
+                        <span class="badge badge-your">YOUR ARTIST</span>
+                    </div>
+                </div>
+                <a href="https://seatgeek.com/ray-lamontagne-tickets/portland-maine-state-theatre-portland-me-2026-09-29-8-pm/concert/17431828" target="_blank" class="ticket-link">Tickets →</a>
+            </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                // Update active states
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // City filtering
+        const cityFilters = document.querySelectorAll('.city-filter');
+        const concertCards = document.querySelectorAll('#summer .concert-card');
+        const monthDividers = document.querySelectorAll('#summer .month-divider');
+
+        cityFilters.forEach(filter => {
+            filter.addEventListener('click', () => {
+                const selectedCity = filter.dataset.city;
+
+                // Update active filter
+                cityFilters.forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+
+                // Filter concerts
+                if (selectedCity === 'all') {
+                    concertCards.forEach(card => card.classList.remove('hidden'));
+                    monthDividers.forEach(divider => divider.classList.remove('hidden'));
+                } else {
+                    concertCards.forEach(card => {
+                        if (card.dataset.city === selectedCity) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+
+                    // Hide month dividers if no concerts in that month
+                    monthDividers.forEach(divider => {
+                        const month = divider.dataset.month;
+                        const visibleInMonth = Array.from(concertCards).some(
+                            card => card.dataset.month === month && !card.classList.contains('hidden')
+                        );
+                        if (visibleInMonth) {
+                            divider.classList.remove('hidden');
+                        } else {
+                            divider.classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        });
+
+        // Stagger animation delays
+        document.querySelectorAll('.concert-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.05}s`;
+        });
+    </script>
+</body>
+</html>
