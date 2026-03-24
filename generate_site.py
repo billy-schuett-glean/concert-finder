@@ -5,9 +5,38 @@
 Generate a beautiful static HTML site from results.txt
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import defaultdict
+import calendar as cal
 import re
+
+
+# City/Venue color mappings
+CITY_COLORS = {
+    'Morrison': '#c45c3a',  # Red Rocks - warm red/rust
+    'Portland': '#4a90a4',  # ocean blue
+    'Berkeley': '#6b8f4a',  # Greek Theatre - eucalyptus green
+    'Charleston': '#9b7cb4',  # lavender
+    'North Charleston': '#9b7cb4',  # same as Charleston
+    'Nashville': '#c9956b',  # warm gold
+    'Austin': '#d4763a',  # burnt orange
+    'Asheville': '#5b8f7b',  # mountain green
+    'Montreal': '#7a8db5',  # steel blue
+    'Vancouver': '#4a7a6a',  # pacific teal
+    'Savannah': '#b89c6a',  # spanish moss gold
+}
+
+# Venue name mappings for display
+VENUE_DISPLAY = {
+    'Morrison': 'Red Rocks Amphitheatre',
+    'Portland': "Thompson's Point",
+    'Berkeley': 'Greek Theatre at U.C. Berkeley',
+}
+
+
+def get_city_color(city):
+    """Get the color for a city."""
+    return CITY_COLORS.get(city, '#c9956b')  # Default to gold
 
 
 def parse_results_file(filename='results.txt'):
@@ -81,6 +110,16 @@ def generate_html(concerts):
     summer_concerts = [c for c in concerts if c['in_window']]
     outside_concerts = [c for c in concerts if not c['in_window']]
 
+    # Group by city/venue for "By Venue" view
+    def group_by_city(concert_list):
+        grouped = defaultdict(list)
+        for concert in concert_list:
+            city = concert['city']
+            grouped[city].append(concert)
+        return grouped
+
+    summer_by_city = group_by_city(summer_concerts)
+
     # Group by month
     def group_by_month(concert_list):
         grouped = defaultdict(list)
@@ -91,7 +130,150 @@ def generate_html(concerts):
     summer_by_month = group_by_month(summer_concerts)
     outside_by_month = group_by_month(outside_concerts)
 
-    # Generate concert cards HTML
+    # Generate "By Venue" view HTML
+    def generate_venue_view():
+        html = '<div class="venue-grid">'
+
+        # Sort cities by number of shows
+        sorted_cities = sorted(summer_by_city.items(), key=lambda x: len(x[1]), reverse=True)
+
+        for city, city_concerts in sorted_cities:
+            color = get_city_color(city)
+            show_count = len(city_concerts)
+            show_text = "show" if show_count == 1 else "shows"
+
+            # Get venue name
+            venue_name = VENUE_DISPLAY.get(city, city_concerts[0]['venue'] if city_concerts else '')
+
+            # Get unique artists for preview
+            artists = list(dict.fromkeys([c['artist'] for c in city_concerts[:3]]))
+            artist_preview = ', '.join(artists[:3])
+            if len(city_concerts) > 3:
+                artist_preview += f" +{len(city_concerts) - 3} more"
+
+            html += f'''
+            <div class="venue-card" data-city="{city}" style="--venue-color: {color}">
+                <div class="venue-card-header">
+                    <div class="venue-city">{city}</div>
+                    <div class="venue-name">{venue_name}</div>
+                    <div class="venue-count">{show_count} {show_text}</div>
+                </div>
+                <div class="venue-preview">{artist_preview}</div>
+                <div class="venue-concerts hidden">
+            '''
+
+            # Add concert details for this venue
+            sorted_concerts = sorted(city_concerts, key=lambda x: x['date_obj'] if x['date_obj'] else datetime.max)
+            for concert in sorted_concerts:
+                badge_class = 'badge-your' if concert['type'] == 'your_artist' else 'badge-discovery'
+                badge_text = 'YOUR ARTIST' if concert['type'] == 'your_artist' else f"DISCOVERY — similar to {concert['similar_to']}" if concert['similar_to'] else 'DISCOVERY'
+
+                html += f'''
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">{concert['artist']}</div>
+                    <div class="venue-concert-date">{concert['weekday']}, {concert['month']} {concert['day']}</div>
+                    <span class="badge {badge_class}">{badge_text}</span>
+                    <a href="{concert['tickets']}" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                '''
+
+            html += '''
+                </div>
+            </div>
+            '''
+
+        html += '</div>'
+        return html
+
+    # Generate calendar view HTML
+    def generate_calendar_view():
+        html = ''
+
+        # Generate calendars for May, June, July, August 2026
+        months = [
+            (2026, 5, 'May 2026'),
+            (2026, 6, 'June 2026'),
+            (2026, 7, 'July 2026'),
+            (2026, 8, 'August 2026'),
+        ]
+
+        for year, month, month_name in months:
+            html += f'''
+            <div class="calendar-month">
+                <div class="calendar-month-title">{month_name}</div>
+                <div class="calendar-grid">
+            '''
+
+            # Day headers
+            html += '<div class="calendar-day-header">Sun</div>'
+            html += '<div class="calendar-day-header">Mon</div>'
+            html += '<div class="calendar-day-header">Tue</div>'
+            html += '<div class="calendar-day-header">Wed</div>'
+            html += '<div class="calendar-day-header">Thu</div>'
+            html += '<div class="calendar-day-header">Fri</div>'
+            html += '<div class="calendar-day-header">Sat</div>'
+
+            # Get calendar for this month
+            month_cal = cal.monthcalendar(year, month)
+
+            # Build concert lookup by date
+            concerts_by_date = defaultdict(list)
+            for concert in summer_concerts:
+                if concert['date_obj'] and concert['date_obj'].year == year and concert['date_obj'].month == month:
+                    day = concert['date_obj'].day
+                    concerts_by_date[day].append(concert)
+
+            # Generate calendar days
+            for week in month_cal:
+                for day in week:
+                    if day == 0:
+                        # Empty cell
+                        html += '<div class="calendar-day empty"></div>'
+                    else:
+                        day_concerts = concerts_by_date.get(day, [])
+                        has_concerts = len(day_concerts) > 0
+
+                        html += f'<div class="calendar-day {"has-concerts" if has_concerts else ""}" data-date="{year}-{month:02d}-{day:02d}">'
+                        html += f'<div class="calendar-day-number">{day}</div>'
+
+                        if has_concerts:
+                            html += '<div class="calendar-concerts">'
+                            for concert in day_concerts:
+                                city_color = get_city_color(concert['city'])
+                                badge_class = 'badge-your' if concert['type'] == 'your_artist' else 'badge-discovery'
+                                badge_text = 'YOUR ARTIST' if concert['type'] == 'your_artist' else f"DISCOVERY — similar to {concert['similar_to']}" if concert['similar_to'] else 'DISCOVERY'
+
+                                # Escape quotes for data attributes
+                                artist_safe = concert['artist'].replace('"', '&quot;')
+                                venue_safe = concert['venue'].replace('"', '&quot;')
+                                city_safe = f"{concert['city']}, {concert['state']}".replace('"', '&quot;')
+                                date_safe = f"{concert['weekday']}, {concert['month']} {concert['day']}".replace('"', '&quot;')
+                                badge_safe = badge_text.replace('"', '&quot;')
+
+                                html += f'''
+                                <div class="calendar-event" style="background: {city_color};"
+                                     data-artist="{artist_safe}"
+                                     data-venue="{venue_safe}"
+                                     data-city="{city_safe}"
+                                     data-date="{date_safe}"
+                                     data-badge="{badge_safe}"
+                                     data-badge-class="{badge_class}"
+                                     data-tickets="{concert['tickets']}">
+                                    {concert['artist'][:20]}{"..." if len(concert['artist']) > 20 else ""}
+                                </div>
+                                '''
+                            html += '</div>'
+
+                        html += '</div>'
+
+            html += '''
+                </div>
+            </div>
+            '''
+
+        return html
+
+    # Generate concert cards HTML (for list view)
     def generate_concert_cards(concerts_by_month):
         html = ""
         for month_year, month_concerts in concerts_by_month.items():
@@ -127,7 +309,11 @@ def generate_html(concerts):
     summer_html = generate_concert_cards(summer_by_month)
     outside_html = generate_concert_cards(outside_by_month)
 
-    # Generate city filter buttons
+    # Generate the three views
+    venue_view_html = generate_venue_view()
+    calendar_view_html = generate_calendar_view()
+
+    # Generate city filter buttons for list view
     all_cities = sorted(cities)
     city_buttons = ''.join([f'<button class="city-filter" data-city="{city}">{city}</button>' for city in all_cities])
 
@@ -160,15 +346,54 @@ def generate_html(concerts):
         }}
 
         .container {{
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
+        }}
+
+        /* Navigation */
+        .nav {{
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }}
+
+        .nav-buttons {{
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }}
+
+        .nav-button {{
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 0.75rem 2rem;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }}
+
+        .nav-button:hover {{
+            color: #c9956b;
+        }}
+
+        .nav-button.active {{
+            color: #c9956b;
+            border-bottom-color: #c9956b;
         }}
 
         /* Hero Section */
         .hero {{
             text-align: center;
-            padding: 6rem 2rem 4rem;
+            padding: 4rem 2rem 3rem;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }}
 
@@ -214,9 +439,315 @@ def generate_html(concerts):
             margin-left: 0.25rem;
         }}
 
-        /* Filter Section */
+        /* View containers */
+        .view {{
+            display: none;
+            padding: 3rem 0;
+        }}
+
+        .view.active {{
+            display: block;
+        }}
+
+        /* Venue View */
+        .venue-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }}
+
+        .venue-card {{
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .venue-card::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--venue-color);
+        }}
+
+        .venue-card:hover {{
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }}
+
+        .venue-card.expanded {{
+            grid-column: 1 / -1;
+        }}
+
+        .venue-card-header {{
+            margin-bottom: 1rem;
+        }}
+
+        .venue-city {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--venue-color);
+            margin-bottom: 0.5rem;
+        }}
+
+        .venue-name {{
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 0.75rem;
+        }}
+
+        .venue-count {{
+            background: rgba(255,255,255,0.08);
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--venue-color);
+            font-weight: 600;
+        }}
+
+        .venue-preview {{
+            color: #a89884;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }}
+
+        .venue-concerts {{
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }}
+
+        .venue-concerts.hidden {{
+            display: none;
+        }}
+
+        .venue-concert-item {{
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+        }}
+
+        .venue-concert-artist {{
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: #e2ddd5;
+            grid-column: 1 / -1;
+        }}
+
+        .venue-concert-date {{
+            color: #c9956b;
+            font-size: 0.95rem;
+        }}
+
+        .venue-ticket-link {{
+            color: #888;
+            text-decoration: none;
+            transition: color 0.3s;
+        }}
+
+        .venue-ticket-link:hover {{
+            color: #c9956b;
+        }}
+
+        /* Calendar View */
+        .calendar-month {{
+            margin-bottom: 4rem;
+        }}
+
+        .calendar-month-title {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-style: italic;
+            color: #c9956b;
+            margin-bottom: 2rem;
+            text-align: center;
+        }}
+
+        .calendar-grid {{
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }}
+
+        .calendar-day-header {{
+            text-align: center;
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }}
+
+        .calendar-day {{
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.75rem;
+            min-height: 120px;
+            position: relative;
+            transition: all 0.3s ease;
+        }}
+
+        .calendar-day.empty {{
+            background: transparent;
+            border: none;
+        }}
+
+        .calendar-day.has-concerts {{
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+        }}
+
+        .calendar-day.has-concerts:hover {{
+            background: rgba(255,255,255,0.06);
+        }}
+
+        .calendar-day-number {{
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }}
+
+        .calendar-day.has-concerts .calendar-day-number {{
+            color: #c9956b;
+        }}
+
+        .calendar-concerts {{
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }}
+
+        .calendar-event {{
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }}
+
+        .calendar-event:hover {{
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }}
+
+        /* Event Popup */
+        .event-popup {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none;
+        }}
+
+        .event-popup.active {{
+            display: block;
+        }}
+
+        .popup-overlay {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }}
+
+        .popup-overlay.active {{
+            display: block;
+        }}
+
+        .popup-close {{
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }}
+
+        .popup-close:hover {{
+            color: #c9956b;
+        }}
+
+        .popup-artist {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #e2ddd5;
+            margin-bottom: 1rem;
+        }}
+
+        .popup-details {{
+            color: #a89884;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }}
+
+        .popup-ticket-btn {{
+            display: inline-block;
+            background: linear-gradient(135deg, #c9956b, #d4a574);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }}
+
+        .popup-ticket-btn:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 149, 107, 0.3);
+        }}
+
+        /* List View (existing styles) */
         .filters {{
-            padding: 3rem 0 2rem;
+            padding: 2rem 0;
             text-align: center;
         }}
 
@@ -228,7 +759,7 @@ def generate_html(concerts):
             margin-top: 1.5rem;
         }}
 
-        .city-filter, .tab-button {{
+        .city-filter {{
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
             color: #888;
@@ -241,19 +772,18 @@ def generate_html(concerts):
             font-weight: 500;
         }}
 
-        .city-filter:hover, .tab-button:hover {{
+        .city-filter:hover {{
             background: rgba(255,255,255,0.08);
             border-color: rgba(201, 149, 107, 0.3);
             color: #c9956b;
         }}
 
-        .city-filter.active, .tab-button.active {{
+        .city-filter.active {{
             background: rgba(201, 149, 107, 0.15);
             border-color: #c9956b;
             color: #c9956b;
         }}
 
-        /* Tabs */
         .tabs {{
             display: flex;
             gap: 1rem;
@@ -271,11 +801,19 @@ def generate_html(concerts):
             font-size: 1.5rem;
             font-style: italic;
             padding: 1rem 2rem;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+
+        .tab-button:hover {{
+            color: #c9956b;
         }}
 
         .tab-button.active {{
             border-bottom-color: #c9956b;
-            background: transparent;
+            color: #c9956b;
         }}
 
         .tab-content {{
@@ -286,7 +824,6 @@ def generate_html(concerts):
             display: block;
         }}
 
-        /* Month Dividers */
         .month-divider {{
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
@@ -297,7 +834,6 @@ def generate_html(concerts):
             border-bottom: 1px solid rgba(201, 149, 107, 0.3);
         }}
 
-        /* Concert Cards */
         .concert-card {{
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
@@ -398,7 +934,6 @@ def generate_html(concerts):
             color: #c9956b;
         }}
 
-        /* Hidden state for filtering */
         .concert-card.hidden {{
             display: none;
         }}
@@ -407,7 +942,6 @@ def generate_html(concerts):
             display: none;
         }}
 
-        /* Empty state */
         .empty-state {{
             text-align: center;
             padding: 4rem 2rem;
@@ -418,7 +952,7 @@ def generate_html(concerts):
         /* Responsive */
         @media (max-width: 768px) {{
             .hero {{
-                padding: 4rem 1.5rem 3rem;
+                padding: 3rem 1.5rem 2rem;
             }}
 
             .hero-title {{
@@ -429,6 +963,33 @@ def generate_html(concerts):
                 flex-direction: column;
                 gap: 0.75rem;
                 padding: 1.5rem 2rem;
+            }}
+
+            .nav-buttons {{
+                gap: 0.5rem;
+            }}
+
+            .nav-button {{
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }}
+
+            .venue-grid {{
+                grid-template-columns: 1fr;
+            }}
+
+            .calendar-grid {{
+                gap: 4px;
+            }}
+
+            .calendar-day {{
+                min-height: 80px;
+                padding: 0.5rem;
+            }}
+
+            .calendar-event {{
+                font-size: 0.65rem;
+                padding: 0.3rem 0.4rem;
             }}
 
             .concert-card {{
@@ -457,6 +1018,15 @@ def generate_html(concerts):
     </style>
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-buttons">
+            <button class="nav-button active" data-view="venue">By Venue</button>
+            <button class="nav-button" data-view="calendar">Calendar</button>
+            <button class="nav-button" data-view="list">List</button>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
     <div class="hero">
         <h1 class="hero-title">Concert Finder</h1>
@@ -469,39 +1039,129 @@ def generate_html(concerts):
     </div>
 
     <div class="container">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="summer">Your Summer</button>
-            <button class="tab-button" data-tab="outside">Worth the Trip</button>
+        <!-- By Venue View (Default) -->
+        <div class="view active" id="venue-view">
+            {venue_view_html}
         </div>
 
-        <!-- Summer Tab -->
-        <div class="tab-content active" id="summer">
-            <!-- Filters -->
-            <div class="filters">
-                <div class="filter-buttons">
-                    <button class="city-filter active" data-city="all">All Cities</button>
-                    {city_buttons}
+        <!-- Calendar View -->
+        <div class="view" id="calendar-view">
+            {calendar_view_html}
+        </div>
+
+        <!-- List View -->
+        <div class="view" id="list-view">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="summer">Your Summer</button>
+                <button class="tab-button" data-tab="outside">Worth the Trip</button>
+            </div>
+
+            <div class="tab-content active" id="summer">
+                <div class="filters">
+                    <div class="filter-buttons">
+                        <button class="city-filter active" data-city="all">All Cities</button>
+                        {city_buttons}
+                    </div>
+                </div>
+
+                <div class="concerts">
+                    {summer_html}
                 </div>
             </div>
 
-            <!-- Concert List -->
-            <div class="concerts">
-                {summer_html}
-            </div>
-        </div>
-
-        <!-- Outside Tab -->
-        <div class="tab-content" id="outside">
-            <!-- Concert List -->
-            <div class="concerts">
-                {outside_html}
+            <div class="tab-content" id="outside">
+                <div class="concerts">
+                    {outside_html}
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Event Popup -->
+    <div class="popup-overlay"></div>
+    <div class="event-popup">
+        <button class="popup-close">×</button>
+        <div class="popup-artist"></div>
+        <div class="popup-details"></div>
+        <div class="popup-badge"></div>
+        <a href="#" class="popup-ticket-btn" target="_blank">Get Tickets →</a>
+    </div>
+
     <script>
-        // Tab switching
+        // Navigation
+        const navButtons = document.querySelectorAll('.nav-button');
+        const views = document.querySelectorAll('.view');
+
+        navButtons.forEach(button => {{
+            button.addEventListener('click', () => {{
+                const viewId = button.dataset.view + '-view';
+
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                views.forEach(view => view.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(viewId).classList.add('active');
+            }});
+        }});
+
+        // Venue card expansion
+        document.querySelectorAll('.venue-card').forEach(card => {{
+            card.addEventListener('click', (e) => {{
+                if (e.target.tagName === 'A') return; // Don't toggle if clicking link
+
+                const concerts = card.querySelector('.venue-concerts');
+                const isExpanded = !concerts.classList.contains('hidden');
+
+                // Collapse all
+                document.querySelectorAll('.venue-concerts').forEach(c => c.classList.add('hidden'));
+                document.querySelectorAll('.venue-card').forEach(c => c.classList.remove('expanded'));
+
+                // Expand clicked
+                if (!isExpanded) {{
+                    concerts.classList.remove('hidden');
+                    card.classList.add('expanded');
+                }}
+            }});
+        }});
+
+        // Calendar event popup
+        const popup = document.querySelector('.event-popup');
+        const overlay = document.querySelector('.popup-overlay');
+        const closeBtn = document.querySelector('.popup-close');
+
+        document.querySelectorAll('.calendar-event').forEach(event => {{
+            event.addEventListener('click', () => {{
+                const artist = event.dataset.artist;
+                const venue = event.dataset.venue;
+                const city = event.dataset.city;
+                const date = event.dataset.date;
+                const badge = event.dataset.badge;
+                const badgeClass = event.dataset.badgeClass;
+                const tickets = event.dataset.tickets;
+
+                popup.querySelector('.popup-artist').textContent = artist;
+                popup.querySelector('.popup-details').innerHTML = `
+                    <div>${{date}}</div>
+                    <div>${{venue}}</div>
+                    <div>${{city}}</div>
+                `;
+                popup.querySelector('.popup-badge').innerHTML = `<span class="badge ${{badgeClass}}">${{badge}}</span>`;
+                popup.querySelector('.popup-ticket-btn').href = tickets;
+
+                popup.classList.add('active');
+                overlay.classList.add('active');
+            }});
+        }});
+
+        function closePopup() {{
+            popup.classList.remove('active');
+            overlay.classList.remove('active');
+        }}
+
+        closeBtn.addEventListener('click', closePopup);
+        overlay.addEventListener('click', closePopup);
+
+        // List view tabs
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
 
@@ -509,7 +1169,6 @@ def generate_html(concerts):
             button.addEventListener('click', () => {{
                 const tabId = button.dataset.tab;
 
-                // Update active states
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabContents.forEach(content => content.classList.remove('active'));
 
@@ -527,11 +1186,9 @@ def generate_html(concerts):
             filter.addEventListener('click', () => {{
                 const selectedCity = filter.dataset.city;
 
-                // Update active filter
                 cityFilters.forEach(f => f.classList.remove('active'));
                 filter.classList.add('active');
 
-                // Filter concerts
                 if (selectedCity === 'all') {{
                     concertCards.forEach(card => card.classList.remove('hidden'));
                     monthDividers.forEach(divider => divider.classList.remove('hidden'));
@@ -544,7 +1201,6 @@ def generate_html(concerts):
                         }}
                     }});
 
-                    // Hide month dividers if no concerts in that month
                     monthDividers.forEach(divider => {{
                         const month = divider.dataset.month;
                         const visibleInMonth = Array.from(concertCards).some(
@@ -560,7 +1216,7 @@ def generate_html(concerts):
             }});
         }});
 
-        // Stagger animation delays
+        // Stagger animation delays for list view
         document.querySelectorAll('.concert-card').forEach((card, index) => {{
             card.style.animationDelay = `${{index * 0.05}}s`;
         }});
@@ -592,6 +1248,10 @@ def main():
 
     print("✓ Generated index.html")
     print("\n🎉 Done! Open index.html in your browser to view the site.")
+    print("\n📍 Features:")
+    print("   - By Venue view (default): Click destination cards to see all shows")
+    print("   - Calendar view: Visual monthly calendar with colored event pills")
+    print("   - List view: Chronological list with city filters")
 
 
 if __name__ == '__main__':

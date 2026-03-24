@@ -26,15 +26,54 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 2rem;
+        }
+
+        /* Navigation */
+        .nav {
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .nav-button {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 0.75rem 2rem;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-button:hover {
+            color: #c9956b;
+        }
+
+        .nav-button.active {
+            color: #c9956b;
+            border-bottom-color: #c9956b;
         }
 
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 6rem 2rem 4rem;
+            padding: 4rem 2rem 3rem;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
 
@@ -80,9 +119,315 @@
             margin-left: 0.25rem;
         }
 
-        /* Filter Section */
+        /* View containers */
+        .view {
+            display: none;
+            padding: 3rem 0;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Venue View */
+        .venue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .venue-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .venue-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--venue-color);
+        }
+
+        .venue-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .venue-card.expanded {
+            grid-column: 1 / -1;
+        }
+
+        .venue-card-header {
+            margin-bottom: 1rem;
+        }
+
+        .venue-city {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--venue-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .venue-name {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 0.75rem;
+        }
+
+        .venue-count {
+            background: rgba(255,255,255,0.08);
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--venue-color);
+            font-weight: 600;
+        }
+
+        .venue-preview {
+            color: #a89884;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .venue-concerts {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .venue-concerts.hidden {
+            display: none;
+        }
+
+        .venue-concert-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .venue-concert-artist {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: #e2ddd5;
+            grid-column: 1 / -1;
+        }
+
+        .venue-concert-date {
+            color: #c9956b;
+            font-size: 0.95rem;
+        }
+
+        .venue-ticket-link {
+            color: #888;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .venue-ticket-link:hover {
+            color: #c9956b;
+        }
+
+        /* Calendar View */
+        .calendar-month {
+            margin-bottom: 4rem;
+        }
+
+        .calendar-month-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-style: italic;
+            color: #c9956b;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-day {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 0.75rem;
+            min-height: 120px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            border: none;
+        }
+
+        .calendar-day.has-concerts {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .calendar-day.has-concerts:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .calendar-day-number {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-concerts .calendar-day-number {
+            color: #c9956b;
+        }
+
+        .calendar-concerts {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .calendar-event {
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-event:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        /* Event Popup */
+        .event-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .event-popup.active {
+            display: block;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .popup-overlay.active {
+            display: block;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+
+        .popup-close:hover {
+            color: #c9956b;
+        }
+
+        .popup-artist {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #e2ddd5;
+            margin-bottom: 1rem;
+        }
+
+        .popup-details {
+            color: #a89884;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .popup-ticket-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #c9956b, #d4a574);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .popup-ticket-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 149, 107, 0.3);
+        }
+
+        /* List View (existing styles) */
         .filters {
-            padding: 3rem 0 2rem;
+            padding: 2rem 0;
             text-align: center;
         }
 
@@ -94,7 +439,7 @@
             margin-top: 1.5rem;
         }
 
-        .city-filter, .tab-button {
+        .city-filter {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
             color: #888;
@@ -107,19 +452,18 @@
             font-weight: 500;
         }
 
-        .city-filter:hover, .tab-button:hover {
+        .city-filter:hover {
             background: rgba(255,255,255,0.08);
             border-color: rgba(201, 149, 107, 0.3);
             color: #c9956b;
         }
 
-        .city-filter.active, .tab-button.active {
+        .city-filter.active {
             background: rgba(201, 149, 107, 0.15);
             border-color: #c9956b;
             color: #c9956b;
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 1rem;
@@ -137,11 +481,19 @@
             font-size: 1.5rem;
             font-style: italic;
             padding: 1rem 2rem;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            color: #c9956b;
         }
 
         .tab-button.active {
             border-bottom-color: #c9956b;
-            background: transparent;
+            color: #c9956b;
         }
 
         .tab-content {
@@ -152,7 +504,6 @@
             display: block;
         }
 
-        /* Month Dividers */
         .month-divider {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
@@ -163,7 +514,6 @@
             border-bottom: 1px solid rgba(201, 149, 107, 0.3);
         }
 
-        /* Concert Cards */
         .concert-card {
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
@@ -264,7 +614,6 @@
             color: #c9956b;
         }
 
-        /* Hidden state for filtering */
         .concert-card.hidden {
             display: none;
         }
@@ -273,7 +622,6 @@
             display: none;
         }
 
-        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -284,7 +632,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero {
-                padding: 4rem 1.5rem 3rem;
+                padding: 3rem 1.5rem 2rem;
             }
 
             .hero-title {
@@ -295,6 +643,33 @@
                 flex-direction: column;
                 gap: 0.75rem;
                 padding: 1.5rem 2rem;
+            }
+
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+
+            .nav-button {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .venue-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .calendar-grid {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 0.5rem;
+            }
+
+            .calendar-event {
+                font-size: 0.65rem;
+                padding: 0.3rem 0.4rem;
             }
 
             .concert-card {
@@ -323,6 +698,15 @@
     </style>
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-buttons">
+            <button class="nav-button active" data-view="venue">By Venue</button>
+            <button class="nav-button" data-view="calendar">Calendar</button>
+            <button class="nav-button" data-view="list">List</button>
+        </div>
+    </nav>
+
     <!-- Hero Section -->
     <div class="hero">
         <h1 class="hero-title">Concert Finder</h1>
@@ -335,25 +719,643 @@
     </div>
 
     <div class="container">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="summer">Your Summer</button>
-            <button class="tab-button" data-tab="outside">Worth the Trip</button>
-        </div>
-
-        <!-- Summer Tab -->
-        <div class="tab-content active" id="summer">
-            <!-- Filters -->
-            <div class="filters">
-                <div class="filter-buttons">
-                    <button class="city-filter active" data-city="all">All Cities</button>
-                    <button class="city-filter" data-city="Asheville">Asheville</button><button class="city-filter" data-city="Austin">Austin</button><button class="city-filter" data-city="Berkeley">Berkeley</button><button class="city-filter" data-city="Charleston">Charleston</button><button class="city-filter" data-city="Morrison">Morrison</button><button class="city-filter" data-city="Nashville">Nashville</button><button class="city-filter" data-city="North Charleston">North Charleston</button><button class="city-filter" data-city="Portland">Portland</button>
+        <!-- By Venue View (Default) -->
+        <div class="view active" id="venue-view">
+            <div class="venue-grid">
+            <div class="venue-card" data-city="Morrison" style="--venue-color: #c45c3a">
+                <div class="venue-card-header">
+                    <div class="venue-city">Morrison</div>
+                    <div class="venue-name">Red Rocks Amphitheatre</div>
+                    <div class="venue-count">10 shows</div>
+                </div>
+                <div class="venue-preview">JJ Grey & Mofro, Lord Huron +7 more</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">JJ Grey & Mofro</div>
+                    <div class="venue-concert-date">Monday, May 25</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-24-7-pm/concert/17958444" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">JJ Grey & Mofro</div>
+                    <div class="venue-concert-date">Tuesday, May 26</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-25-7-pm/concert/17958445" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Lord Huron</div>
+                    <div class="venue-concert-date">Thursday, June 11</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/lord-huron-tickets/morrison-colorado-red-rocks-amphitheatre-2026-06-10-6-pm/concert/17947908" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Avett Brothers</div>
+                    <div class="venue-concert-date">Saturday, July 11</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-10-7-30-pm/concert/17945965" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Avett Brothers</div>
+                    <div class="venue-concert-date">Sunday, July 12</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-11-7-30-pm/concert/17945966" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Avett Brothers</div>
+                    <div class="venue-concert-date">Monday, July 13</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-12-7-30-pm/concert/17945967" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Head and the Heart</div>
+                    <div class="venue-concert-date">Thursday, July 16</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-15-7-30-pm/concert/17907129" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Head and the Heart</div>
+                    <div class="venue-concert-date">Friday, July 17</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-16-7-30-pm/concert/17907131" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Mt. Joy</div>
+                    <div class="venue-concert-date">Friday, August 14</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-13-7-pm/concert/17919355" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Mt. Joy</div>
+                    <div class="venue-concert-date">Saturday, August 15</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-14-7-pm/concert/17919356" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
                 </div>
             </div>
-
-            <!-- Concert List -->
-            <div class="concerts">
+            
+            <div class="venue-card" data-city="Portland" style="--venue-color: #4a90a4">
+                <div class="venue-card-header">
+                    <div class="venue-city">Portland</div>
+                    <div class="venue-name">Thompson's Point</div>
+                    <div class="venue-count">4 shows</div>
+                </div>
+                <div class="venue-preview">Ryan Bingham, The Head and the Heart, Lake Street Dive +1 more</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Ryan Bingham</div>
+                    <div class="venue-concert-date">Wednesday, June 03</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/ryan-bingham-tickets/portland-maine-state-theatre-portland-me-2026-06-02-8-pm/concert/18078217" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
                 
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">The Head and the Heart</div>
+                    <div class="venue-concert-date">Sunday, August 02</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/the-head-and-the-heart-tickets/portland-maine-thompson-s-point-2026-08-02-6-pm/concert/18115755" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Lake Street Dive</div>
+                    <div class="venue-concert-date">Saturday, August 15</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-15-7-pm/concert/18002825" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Lake Street Dive</div>
+                    <div class="venue-concert-date">Sunday, August 16</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-16-7-pm/concert/18002826" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="Berkeley" style="--venue-color: #6b8f4a">
+                <div class="venue-card-header">
+                    <div class="venue-city">Berkeley</div>
+                    <div class="venue-name">Greek Theatre at U.C. Berkeley</div>
+                    <div class="venue-count">3 shows</div>
+                </div>
+                <div class="venue-preview">Nathaniel Rateliff & The Night Sweats, Rainbow Kitten Surprise</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Nathaniel Rateliff & The Night Sweats</div>
+                    <div class="venue-concert-date">Saturday, May 30</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-29-8-pm/concert/18030218" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Nathaniel Rateliff & The Night Sweats</div>
+                    <div class="venue-concert-date">Sunday, May 31</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-30-8-pm/concert/18030219" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Rainbow Kitten Surprise</div>
+                    <div class="venue-concert-date">Sunday, July 19</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Mt. Joy</span>
+                    <a href="https://seatgeek.com/rainbow-kitten-surprise-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-07-18-8-pm/concert/17856857" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="Charleston" style="--venue-color: #9b7cb4">
+                <div class="venue-card-header">
+                    <div class="venue-city">Charleston</div>
+                    <div class="venue-name">Credit One Stadium</div>
+                    <div class="venue-count">3 shows</div>
+                </div>
+                <div class="venue-preview">Mt. Joy, Lord Huron, Cat Power</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Mt. Joy</div>
+                    <div class="venue-concert-date">Sunday, June 14</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/mt-joy-tickets/charleston-south-carolina-credit-one-stadium-2026-06-13-8-pm/concert/17939243" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Lord Huron</div>
+                    <div class="venue-concert-date">Tuesday, June 16</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/lord-huron-tickets/charleston-south-carolina-credit-one-stadium-2026-06-16-7-30-pm/concert/18022218" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Cat Power</div>
+                    <div class="venue-concert-date">Monday, July 20</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/cat-power-tickets/charleston-south-carolina-charleston-music-hall-2026-07-19-8-pm/concert/18090736" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="Nashville" style="--venue-color: #c9956b">
+                <div class="venue-card-header">
+                    <div class="venue-city">Nashville</div>
+                    <div class="venue-name">Nashville Municipal Auditorium</div>
+                    <div class="venue-count">2 shows</div>
+                </div>
+                <div class="venue-preview">Marcus King, Eric Church</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Marcus King</div>
+                    <div class="venue-concert-date">Thursday, May 28</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/marcus-king-tickets/nashville-tennessee-nashville-municipal-auditorium-2026-05-27-8-pm/concert/18116614" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Eric Church</div>
+                    <div class="venue-concert-date">Saturday, June 27</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/alan-jackson-tickets/nashville-tennessee-nissan-stadium-2026-06-27-5-30-pm/concert/17781733" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="Asheville" style="--venue-color: #5b8f7b">
+                <div class="venue-card-header">
+                    <div class="venue-city">Asheville</div>
+                    <div class="venue-name">Harrah's Cherokee Center - Asheville</div>
+                    <div class="venue-count">2 shows</div>
+                </div>
+                <div class="venue-preview">Lord Huron, Band of Horses</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Lord Huron</div>
+                    <div class="venue-concert-date">Monday, June 15</div>
+                    <span class="badge badge-discovery">DISCOVERY — similar to Fleet Foxes</span>
+                    <a href="https://seatgeek.com/lord-huron-tickets/asheville-north-carolina-harrah-s-cherokee-center-asheville-2026-06-14-8-pm/concert/18022215" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Band of Horses</div>
+                    <div class="venue-concert-date">Friday, July 17</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/band-of-horses-tickets/asheville-north-carolina-hellbenders-by-the-orange-peel-2026-07-17-7-pm/concert/18125833" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="North Charleston" style="--venue-color: #9b7cb4">
+                <div class="venue-card-header">
+                    <div class="venue-city">North Charleston</div>
+                    <div class="venue-name">North Charleston Coliseum</div>
+                    <div class="venue-count">2 shows</div>
+                </div>
+                <div class="venue-preview">Chris Stapleton</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Chris Stapleton</div>
+                    <div class="venue-concert-date">Friday, June 26</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-26-7-30-pm/concert/18004696" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Chris Stapleton</div>
+                    <div class="venue-concert-date">Saturday, June 27</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-27-7-30-pm/concert/18013270" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="venue-card" data-city="Austin" style="--venue-color: #d4763a">
+                <div class="venue-card-header">
+                    <div class="venue-city">Austin</div>
+                    <div class="venue-name">Germania Insurance Amphitheater</div>
+                    <div class="venue-count">1 show</div>
+                </div>
+                <div class="venue-preview">Stephen Wilson Jr.</div>
+                <div class="venue-concerts hidden">
+            
+                <div class="venue-concert-item">
+                    <div class="venue-concert-artist">Stephen Wilson Jr.</div>
+                    <div class="venue-concert-date">Saturday, July 04</div>
+                    <span class="badge badge-your">YOUR ARTIST</span>
+                    <a href="https://seatgeek.com/outlaw-music-festival-tickets/austin-texas-germania-insurance-amphitheater-2026-07-04-3-30-pm/concert/18140159" target="_blank" class="venue-ticket-link">Tickets →</a>
+                </div>
+                
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="view" id="calendar-view">
+            
+            <div class="calendar-month">
+                <div class="calendar-month-title">May 2026</div>
+                <div class="calendar-grid">
+            <div class="calendar-day-header">Sun</div><div class="calendar-day-header">Mon</div><div class="calendar-day-header">Tue</div><div class="calendar-day-header">Wed</div><div class="calendar-day-header">Thu</div><div class="calendar-day-header">Fri</div><div class="calendar-day-header">Sat</div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day " data-date="2026-05-01"><div class="calendar-day-number">1</div></div><div class="calendar-day " data-date="2026-05-02"><div class="calendar-day-number">2</div></div><div class="calendar-day " data-date="2026-05-03"><div class="calendar-day-number">3</div></div><div class="calendar-day " data-date="2026-05-04"><div class="calendar-day-number">4</div></div><div class="calendar-day " data-date="2026-05-05"><div class="calendar-day-number">5</div></div><div class="calendar-day " data-date="2026-05-06"><div class="calendar-day-number">6</div></div><div class="calendar-day " data-date="2026-05-07"><div class="calendar-day-number">7</div></div><div class="calendar-day " data-date="2026-05-08"><div class="calendar-day-number">8</div></div><div class="calendar-day " data-date="2026-05-09"><div class="calendar-day-number">9</div></div><div class="calendar-day " data-date="2026-05-10"><div class="calendar-day-number">10</div></div><div class="calendar-day " data-date="2026-05-11"><div class="calendar-day-number">11</div></div><div class="calendar-day " data-date="2026-05-12"><div class="calendar-day-number">12</div></div><div class="calendar-day " data-date="2026-05-13"><div class="calendar-day-number">13</div></div><div class="calendar-day " data-date="2026-05-14"><div class="calendar-day-number">14</div></div><div class="calendar-day " data-date="2026-05-15"><div class="calendar-day-number">15</div></div><div class="calendar-day " data-date="2026-05-16"><div class="calendar-day-number">16</div></div><div class="calendar-day " data-date="2026-05-17"><div class="calendar-day-number">17</div></div><div class="calendar-day " data-date="2026-05-18"><div class="calendar-day-number">18</div></div><div class="calendar-day " data-date="2026-05-19"><div class="calendar-day-number">19</div></div><div class="calendar-day " data-date="2026-05-20"><div class="calendar-day-number">20</div></div><div class="calendar-day " data-date="2026-05-21"><div class="calendar-day-number">21</div></div><div class="calendar-day " data-date="2026-05-22"><div class="calendar-day-number">22</div></div><div class="calendar-day " data-date="2026-05-23"><div class="calendar-day-number">23</div></div><div class="calendar-day " data-date="2026-05-24"><div class="calendar-day-number">24</div></div><div class="calendar-day has-concerts" data-date="2026-05-25"><div class="calendar-day-number">25</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="JJ Grey & Mofro"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Monday, May 25"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-24-7-pm/concert/17958444">
+                                    JJ Grey & Mofro
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-05-26"><div class="calendar-day-number">26</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="JJ Grey & Mofro"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Tuesday, May 26"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/alabama-shakes-tickets/morrison-colorado-red-rocks-amphitheatre-2026-05-25-7-pm/concert/17958445">
+                                    JJ Grey & Mofro
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-05-27"><div class="calendar-day-number">27</div></div><div class="calendar-day has-concerts" data-date="2026-05-28"><div class="calendar-day-number">28</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c9956b;"
+                                     data-artist="Marcus King"
+                                     data-venue="Nashville Municipal Auditorium"
+                                     data-city="Nashville, TN"
+                                     data-date="Thursday, May 28"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/marcus-king-tickets/nashville-tennessee-nashville-municipal-auditorium-2026-05-27-8-pm/concert/18116614">
+                                    Marcus King
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-05-29"><div class="calendar-day-number">29</div></div><div class="calendar-day has-concerts" data-date="2026-05-30"><div class="calendar-day-number">30</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #6b8f4a;"
+                                     data-artist="Nathaniel Rateliff & The Night Sweats"
+                                     data-venue="The Greek Theatre at U.C. Berkeley"
+                                     data-city="Berkeley, CA"
+                                     data-date="Saturday, May 30"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-29-8-pm/concert/18030218">
+                                    Nathaniel Rateliff &...
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-05-31"><div class="calendar-day-number">31</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #6b8f4a;"
+                                     data-artist="Nathaniel Rateliff & The Night Sweats"
+                                     data-venue="The Greek Theatre at U.C. Berkeley"
+                                     data-city="Berkeley, CA"
+                                     data-date="Sunday, May 31"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/alabama-shakes-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-05-30-8-pm/concert/18030219">
+                                    Nathaniel Rateliff &...
+                                </div>
+                                </div></div>
+                </div>
+            </div>
+            
+            <div class="calendar-month">
+                <div class="calendar-month-title">June 2026</div>
+                <div class="calendar-grid">
+            <div class="calendar-day-header">Sun</div><div class="calendar-day-header">Mon</div><div class="calendar-day-header">Tue</div><div class="calendar-day-header">Wed</div><div class="calendar-day-header">Thu</div><div class="calendar-day-header">Fri</div><div class="calendar-day-header">Sat</div><div class="calendar-day " data-date="2026-06-01"><div class="calendar-day-number">1</div></div><div class="calendar-day " data-date="2026-06-02"><div class="calendar-day-number">2</div></div><div class="calendar-day has-concerts" data-date="2026-06-03"><div class="calendar-day-number">3</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #4a90a4;"
+                                     data-artist="Ryan Bingham"
+                                     data-venue="State Theatre - Portland, ME"
+                                     data-city="Portland, ME"
+                                     data-date="Wednesday, June 03"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/ryan-bingham-tickets/portland-maine-state-theatre-portland-me-2026-06-02-8-pm/concert/18078217">
+                                    Ryan Bingham
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-06-04"><div class="calendar-day-number">4</div></div><div class="calendar-day " data-date="2026-06-05"><div class="calendar-day-number">5</div></div><div class="calendar-day " data-date="2026-06-06"><div class="calendar-day-number">6</div></div><div class="calendar-day " data-date="2026-06-07"><div class="calendar-day-number">7</div></div><div class="calendar-day " data-date="2026-06-08"><div class="calendar-day-number">8</div></div><div class="calendar-day " data-date="2026-06-09"><div class="calendar-day-number">9</div></div><div class="calendar-day " data-date="2026-06-10"><div class="calendar-day-number">10</div></div><div class="calendar-day has-concerts" data-date="2026-06-11"><div class="calendar-day-number">11</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="Lord Huron"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Thursday, June 11"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/lord-huron-tickets/morrison-colorado-red-rocks-amphitheatre-2026-06-10-6-pm/concert/17947908">
+                                    Lord Huron
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-06-12"><div class="calendar-day-number">12</div></div><div class="calendar-day " data-date="2026-06-13"><div class="calendar-day-number">13</div></div><div class="calendar-day has-concerts" data-date="2026-06-14"><div class="calendar-day-number">14</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #9b7cb4;"
+                                     data-artist="Mt. Joy"
+                                     data-venue="Credit One Stadium"
+                                     data-city="Charleston, SC"
+                                     data-date="Sunday, June 14"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/mt-joy-tickets/charleston-south-carolina-credit-one-stadium-2026-06-13-8-pm/concert/17939243">
+                                    Mt. Joy
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-06-15"><div class="calendar-day-number">15</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #5b8f7b;"
+                                     data-artist="Lord Huron"
+                                     data-venue="Harrah's Cherokee Center - Asheville"
+                                     data-city="Asheville, NC"
+                                     data-date="Monday, June 15"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/lord-huron-tickets/asheville-north-carolina-harrah-s-cherokee-center-asheville-2026-06-14-8-pm/concert/18022215">
+                                    Lord Huron
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-06-16"><div class="calendar-day-number">16</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #9b7cb4;"
+                                     data-artist="Lord Huron"
+                                     data-venue="Credit One Stadium"
+                                     data-city="Charleston, SC"
+                                     data-date="Tuesday, June 16"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/lord-huron-tickets/charleston-south-carolina-credit-one-stadium-2026-06-16-7-30-pm/concert/18022218">
+                                    Lord Huron
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-06-17"><div class="calendar-day-number">17</div></div><div class="calendar-day " data-date="2026-06-18"><div class="calendar-day-number">18</div></div><div class="calendar-day " data-date="2026-06-19"><div class="calendar-day-number">19</div></div><div class="calendar-day " data-date="2026-06-20"><div class="calendar-day-number">20</div></div><div class="calendar-day " data-date="2026-06-21"><div class="calendar-day-number">21</div></div><div class="calendar-day " data-date="2026-06-22"><div class="calendar-day-number">22</div></div><div class="calendar-day " data-date="2026-06-23"><div class="calendar-day-number">23</div></div><div class="calendar-day " data-date="2026-06-24"><div class="calendar-day-number">24</div></div><div class="calendar-day " data-date="2026-06-25"><div class="calendar-day-number">25</div></div><div class="calendar-day has-concerts" data-date="2026-06-26"><div class="calendar-day-number">26</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #9b7cb4;"
+                                     data-artist="Chris Stapleton"
+                                     data-venue="North Charleston Coliseum"
+                                     data-city="North Charleston, SC"
+                                     data-date="Friday, June 26"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-26-7-30-pm/concert/18004696">
+                                    Chris Stapleton
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-06-27"><div class="calendar-day-number">27</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #9b7cb4;"
+                                     data-artist="Chris Stapleton"
+                                     data-venue="North Charleston Coliseum"
+                                     data-city="North Charleston, SC"
+                                     data-date="Saturday, June 27"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/chris-stapleton-tickets/north-charleston-south-carolina-north-charleston-coliseum-2026-06-27-7-30-pm/concert/18013270">
+                                    Chris Stapleton
+                                </div>
+                                
+                                <div class="calendar-event" style="background: #c9956b;"
+                                     data-artist="Eric Church"
+                                     data-venue="Nissan Stadium"
+                                     data-city="Nashville, TN"
+                                     data-date="Saturday, June 27"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/alan-jackson-tickets/nashville-tennessee-nissan-stadium-2026-06-27-5-30-pm/concert/17781733">
+                                    Eric Church
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-06-28"><div class="calendar-day-number">28</div></div><div class="calendar-day " data-date="2026-06-29"><div class="calendar-day-number">29</div></div><div class="calendar-day " data-date="2026-06-30"><div class="calendar-day-number">30</div></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div>
+                </div>
+            </div>
+            
+            <div class="calendar-month">
+                <div class="calendar-month-title">July 2026</div>
+                <div class="calendar-grid">
+            <div class="calendar-day-header">Sun</div><div class="calendar-day-header">Mon</div><div class="calendar-day-header">Tue</div><div class="calendar-day-header">Wed</div><div class="calendar-day-header">Thu</div><div class="calendar-day-header">Fri</div><div class="calendar-day-header">Sat</div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day " data-date="2026-07-01"><div class="calendar-day-number">1</div></div><div class="calendar-day " data-date="2026-07-02"><div class="calendar-day-number">2</div></div><div class="calendar-day " data-date="2026-07-03"><div class="calendar-day-number">3</div></div><div class="calendar-day has-concerts" data-date="2026-07-04"><div class="calendar-day-number">4</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #d4763a;"
+                                     data-artist="Stephen Wilson Jr."
+                                     data-venue="Germania Insurance Amphitheater"
+                                     data-city="Austin, TX"
+                                     data-date="Saturday, July 04"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/outlaw-music-festival-tickets/austin-texas-germania-insurance-amphitheater-2026-07-04-3-30-pm/concert/18140159">
+                                    Stephen Wilson Jr.
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-07-05"><div class="calendar-day-number">5</div></div><div class="calendar-day " data-date="2026-07-06"><div class="calendar-day-number">6</div></div><div class="calendar-day " data-date="2026-07-07"><div class="calendar-day-number">7</div></div><div class="calendar-day " data-date="2026-07-08"><div class="calendar-day-number">8</div></div><div class="calendar-day " data-date="2026-07-09"><div class="calendar-day-number">9</div></div><div class="calendar-day " data-date="2026-07-10"><div class="calendar-day-number">10</div></div><div class="calendar-day has-concerts" data-date="2026-07-11"><div class="calendar-day-number">11</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="The Avett Brothers"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Saturday, July 11"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-10-7-30-pm/concert/17945965">
+                                    The Avett Brothers
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-07-12"><div class="calendar-day-number">12</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="The Avett Brothers"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Sunday, July 12"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-11-7-30-pm/concert/17945966">
+                                    The Avett Brothers
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-07-13"><div class="calendar-day-number">13</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="The Avett Brothers"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Monday, July 13"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/the-avett-brothers-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-12-7-30-pm/concert/17945967">
+                                    The Avett Brothers
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-07-14"><div class="calendar-day-number">14</div></div><div class="calendar-day " data-date="2026-07-15"><div class="calendar-day-number">15</div></div><div class="calendar-day has-concerts" data-date="2026-07-16"><div class="calendar-day-number">16</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="The Head and the Heart"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Thursday, July 16"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-15-7-30-pm/concert/17907129">
+                                    The Head and the Hea...
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-07-17"><div class="calendar-day-number">17</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #5b8f7b;"
+                                     data-artist="Band of Horses"
+                                     data-venue="Hellbender by The Orange Peel"
+                                     data-city="Asheville, NC"
+                                     data-date="Friday, July 17"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/band-of-horses-tickets/asheville-north-carolina-hellbenders-by-the-orange-peel-2026-07-17-7-pm/concert/18125833">
+                                    Band of Horses
+                                </div>
+                                
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="The Head and the Heart"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Friday, July 17"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/the-head-and-the-heart-tickets/morrison-colorado-red-rocks-amphitheatre-2026-07-16-7-30-pm/concert/17907131">
+                                    The Head and the Hea...
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-07-18"><div class="calendar-day-number">18</div></div><div class="calendar-day has-concerts" data-date="2026-07-19"><div class="calendar-day-number">19</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #6b8f4a;"
+                                     data-artist="Rainbow Kitten Surprise"
+                                     data-venue="The Greek Theatre at U.C. Berkeley"
+                                     data-city="Berkeley, CA"
+                                     data-date="Sunday, July 19"
+                                     data-badge="DISCOVERY — similar to Mt. Joy"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/rainbow-kitten-surprise-tickets/berkeley-california-the-greek-theatre-at-u-c-berkeley-2026-07-18-8-pm/concert/17856857">
+                                    Rainbow Kitten Surpr...
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-07-20"><div class="calendar-day-number">20</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #9b7cb4;"
+                                     data-artist="Cat Power"
+                                     data-venue="Charleston Music Hall"
+                                     data-city="Charleston, SC"
+                                     data-date="Monday, July 20"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/cat-power-tickets/charleston-south-carolina-charleston-music-hall-2026-07-19-8-pm/concert/18090736">
+                                    Cat Power
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-07-21"><div class="calendar-day-number">21</div></div><div class="calendar-day " data-date="2026-07-22"><div class="calendar-day-number">22</div></div><div class="calendar-day " data-date="2026-07-23"><div class="calendar-day-number">23</div></div><div class="calendar-day " data-date="2026-07-24"><div class="calendar-day-number">24</div></div><div class="calendar-day " data-date="2026-07-25"><div class="calendar-day-number">25</div></div><div class="calendar-day " data-date="2026-07-26"><div class="calendar-day-number">26</div></div><div class="calendar-day " data-date="2026-07-27"><div class="calendar-day-number">27</div></div><div class="calendar-day " data-date="2026-07-28"><div class="calendar-day-number">28</div></div><div class="calendar-day " data-date="2026-07-29"><div class="calendar-day-number">29</div></div><div class="calendar-day " data-date="2026-07-30"><div class="calendar-day-number">30</div></div><div class="calendar-day " data-date="2026-07-31"><div class="calendar-day-number">31</div></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div>
+                </div>
+            </div>
+            
+            <div class="calendar-month">
+                <div class="calendar-month-title">August 2026</div>
+                <div class="calendar-grid">
+            <div class="calendar-day-header">Sun</div><div class="calendar-day-header">Mon</div><div class="calendar-day-header">Tue</div><div class="calendar-day-header">Wed</div><div class="calendar-day-header">Thu</div><div class="calendar-day-header">Fri</div><div class="calendar-day-header">Sat</div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day " data-date="2026-08-01"><div class="calendar-day-number">1</div></div><div class="calendar-day has-concerts" data-date="2026-08-02"><div class="calendar-day-number">2</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #4a90a4;"
+                                     data-artist="The Head and the Heart"
+                                     data-venue="Thompson's Point"
+                                     data-city="Portland, ME"
+                                     data-date="Sunday, August 02"
+                                     data-badge="DISCOVERY — similar to Fleet Foxes"
+                                     data-badge-class="badge-discovery"
+                                     data-tickets="https://seatgeek.com/the-head-and-the-heart-tickets/portland-maine-thompson-s-point-2026-08-02-6-pm/concert/18115755">
+                                    The Head and the Hea...
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-08-03"><div class="calendar-day-number">3</div></div><div class="calendar-day " data-date="2026-08-04"><div class="calendar-day-number">4</div></div><div class="calendar-day " data-date="2026-08-05"><div class="calendar-day-number">5</div></div><div class="calendar-day " data-date="2026-08-06"><div class="calendar-day-number">6</div></div><div class="calendar-day " data-date="2026-08-07"><div class="calendar-day-number">7</div></div><div class="calendar-day " data-date="2026-08-08"><div class="calendar-day-number">8</div></div><div class="calendar-day " data-date="2026-08-09"><div class="calendar-day-number">9</div></div><div class="calendar-day " data-date="2026-08-10"><div class="calendar-day-number">10</div></div><div class="calendar-day " data-date="2026-08-11"><div class="calendar-day-number">11</div></div><div class="calendar-day " data-date="2026-08-12"><div class="calendar-day-number">12</div></div><div class="calendar-day " data-date="2026-08-13"><div class="calendar-day-number">13</div></div><div class="calendar-day has-concerts" data-date="2026-08-14"><div class="calendar-day-number">14</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="Mt. Joy"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Friday, August 14"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-13-7-pm/concert/17919355">
+                                    Mt. Joy
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-08-15"><div class="calendar-day-number">15</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #c45c3a;"
+                                     data-artist="Mt. Joy"
+                                     data-venue="Red Rocks Amphitheatre"
+                                     data-city="Morrison, CO"
+                                     data-date="Saturday, August 15"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/mt-joy-tickets/morrison-colorado-red-rocks-amphitheatre-2026-08-14-7-pm/concert/17919356">
+                                    Mt. Joy
+                                </div>
+                                
+                                <div class="calendar-event" style="background: #4a90a4;"
+                                     data-artist="Lake Street Dive"
+                                     data-venue="Thompson's Point"
+                                     data-city="Portland, ME"
+                                     data-date="Saturday, August 15"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-15-7-pm/concert/18002825">
+                                    Lake Street Dive
+                                </div>
+                                </div></div><div class="calendar-day has-concerts" data-date="2026-08-16"><div class="calendar-day-number">16</div><div class="calendar-concerts">
+                                <div class="calendar-event" style="background: #4a90a4;"
+                                     data-artist="Lake Street Dive"
+                                     data-venue="Thompson's Point"
+                                     data-city="Portland, ME"
+                                     data-date="Sunday, August 16"
+                                     data-badge="YOUR ARTIST"
+                                     data-badge-class="badge-your"
+                                     data-tickets="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-16-7-pm/concert/18002826">
+                                    Lake Street Dive
+                                </div>
+                                </div></div><div class="calendar-day " data-date="2026-08-17"><div class="calendar-day-number">17</div></div><div class="calendar-day " data-date="2026-08-18"><div class="calendar-day-number">18</div></div><div class="calendar-day " data-date="2026-08-19"><div class="calendar-day-number">19</div></div><div class="calendar-day " data-date="2026-08-20"><div class="calendar-day-number">20</div></div><div class="calendar-day " data-date="2026-08-21"><div class="calendar-day-number">21</div></div><div class="calendar-day " data-date="2026-08-22"><div class="calendar-day-number">22</div></div><div class="calendar-day " data-date="2026-08-23"><div class="calendar-day-number">23</div></div><div class="calendar-day " data-date="2026-08-24"><div class="calendar-day-number">24</div></div><div class="calendar-day " data-date="2026-08-25"><div class="calendar-day-number">25</div></div><div class="calendar-day " data-date="2026-08-26"><div class="calendar-day-number">26</div></div><div class="calendar-day " data-date="2026-08-27"><div class="calendar-day-number">27</div></div><div class="calendar-day " data-date="2026-08-28"><div class="calendar-day-number">28</div></div><div class="calendar-day " data-date="2026-08-29"><div class="calendar-day-number">29</div></div><div class="calendar-day " data-date="2026-08-30"><div class="calendar-day-number">30</div></div><div class="calendar-day " data-date="2026-08-31"><div class="calendar-day-number">31</div></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div><div class="calendar-day empty"></div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- List View -->
+        <div class="view" id="list-view">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="summer">Your Summer</button>
+                <button class="tab-button" data-tab="outside">Worth the Trip</button>
+            </div>
+
+            <div class="tab-content active" id="summer">
+                <div class="filters">
+                    <div class="filter-buttons">
+                        <button class="city-filter active" data-city="all">All Cities</button>
+                        <button class="city-filter" data-city="Asheville">Asheville</button><button class="city-filter" data-city="Austin">Austin</button><button class="city-filter" data-city="Berkeley">Berkeley</button><button class="city-filter" data-city="Charleston">Charleston</button><button class="city-filter" data-city="Morrison">Morrison</button><button class="city-filter" data-city="Nashville">Nashville</button><button class="city-filter" data-city="North Charleston">North Charleston</button><button class="city-filter" data-city="Portland">Portland</button>
+                    </div>
+                </div>
+
+                <div class="concerts">
+                    
             <div class="month-divider" data-month="May 2026">
                 <span>May 2026</span>
             </div>
@@ -775,14 +1777,12 @@
                 <a href="https://seatgeek.com/lake-street-dive-tickets/portland-maine-thompson-s-point-2026-08-16-7-pm/concert/18002826" target="_blank" class="ticket-link">Tickets →</a>
             </div>
                 
+                </div>
             </div>
-        </div>
 
-        <!-- Outside Tab -->
-        <div class="tab-content" id="outside">
-            <!-- Concert List -->
-            <div class="concerts">
-                
+            <div class="tab-content" id="outside">
+                <div class="concerts">
+                    
             <div class="month-divider" data-month="August 2026">
                 <span>August 2026</span>
             </div>
@@ -1001,12 +2001,96 @@
                 <a href="https://seatgeek.com/ray-lamontagne-tickets/portland-maine-state-theatre-portland-me-2026-09-29-8-pm/concert/17431828" target="_blank" class="ticket-link">Tickets →</a>
             </div>
                 
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Event Popup -->
+    <div class="popup-overlay"></div>
+    <div class="event-popup">
+        <button class="popup-close">×</button>
+        <div class="popup-artist"></div>
+        <div class="popup-details"></div>
+        <div class="popup-badge"></div>
+        <a href="#" class="popup-ticket-btn" target="_blank">Get Tickets →</a>
+    </div>
+
     <script>
-        // Tab switching
+        // Navigation
+        const navButtons = document.querySelectorAll('.nav-button');
+        const views = document.querySelectorAll('.view');
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const viewId = button.dataset.view + '-view';
+
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                views.forEach(view => view.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(viewId).classList.add('active');
+            });
+        });
+
+        // Venue card expansion
+        document.querySelectorAll('.venue-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') return; // Don't toggle if clicking link
+
+                const concerts = card.querySelector('.venue-concerts');
+                const isExpanded = !concerts.classList.contains('hidden');
+
+                // Collapse all
+                document.querySelectorAll('.venue-concerts').forEach(c => c.classList.add('hidden'));
+                document.querySelectorAll('.venue-card').forEach(c => c.classList.remove('expanded'));
+
+                // Expand clicked
+                if (!isExpanded) {
+                    concerts.classList.remove('hidden');
+                    card.classList.add('expanded');
+                }
+            });
+        });
+
+        // Calendar event popup
+        const popup = document.querySelector('.event-popup');
+        const overlay = document.querySelector('.popup-overlay');
+        const closeBtn = document.querySelector('.popup-close');
+
+        document.querySelectorAll('.calendar-event').forEach(event => {
+            event.addEventListener('click', () => {
+                const artist = event.dataset.artist;
+                const venue = event.dataset.venue;
+                const city = event.dataset.city;
+                const date = event.dataset.date;
+                const badge = event.dataset.badge;
+                const badgeClass = event.dataset.badgeClass;
+                const tickets = event.dataset.tickets;
+
+                popup.querySelector('.popup-artist').textContent = artist;
+                popup.querySelector('.popup-details').innerHTML = `
+                    <div>${date}</div>
+                    <div>${venue}</div>
+                    <div>${city}</div>
+                `;
+                popup.querySelector('.popup-badge').innerHTML = `<span class="badge ${badgeClass}">${badge}</span>`;
+                popup.querySelector('.popup-ticket-btn').href = tickets;
+
+                popup.classList.add('active');
+                overlay.classList.add('active');
+            });
+        });
+
+        function closePopup() {
+            popup.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        closeBtn.addEventListener('click', closePopup);
+        overlay.addEventListener('click', closePopup);
+
+        // List view tabs
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
 
@@ -1014,7 +2098,6 @@
             button.addEventListener('click', () => {
                 const tabId = button.dataset.tab;
 
-                // Update active states
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabContents.forEach(content => content.classList.remove('active'));
 
@@ -1032,11 +2115,9 @@
             filter.addEventListener('click', () => {
                 const selectedCity = filter.dataset.city;
 
-                // Update active filter
                 cityFilters.forEach(f => f.classList.remove('active'));
                 filter.classList.add('active');
 
-                // Filter concerts
                 if (selectedCity === 'all') {
                     concertCards.forEach(card => card.classList.remove('hidden'));
                     monthDividers.forEach(divider => divider.classList.remove('hidden'));
@@ -1049,7 +2130,6 @@
                         }
                     });
 
-                    // Hide month dividers if no concerts in that month
                     monthDividers.forEach(divider => {
                         const month = divider.dataset.month;
                         const visibleInMonth = Array.from(concertCards).some(
@@ -1065,7 +2145,7 @@
             });
         });
 
-        // Stagger animation delays
+        // Stagger animation delays for list view
         document.querySelectorAll('.concert-card').forEach((card, index) => {
             card.style.animationDelay = `${index * 0.05}s`;
         });
